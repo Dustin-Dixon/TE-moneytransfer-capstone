@@ -1,6 +1,6 @@
-﻿using TenmoServer.Security.Models;
-using System;
+﻿using System;
 using System.Security.Cryptography;
+using TenmoServer.Security.Models;
 
 namespace TenmoServer.Security
 {
