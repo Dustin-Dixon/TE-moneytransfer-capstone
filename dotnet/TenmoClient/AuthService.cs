@@ -108,5 +108,13 @@ namespace TenmoClient
 
             return response.Data;
         }
+
+        public void CreateTransfer(API_Transfer transfer)
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + "account/transfers");
+            request.AddJsonBody(transfer);
+
+            IRestResponse<API_Transfer> response = client.Post<API_Transfer>(request);
+        }
     }
 }

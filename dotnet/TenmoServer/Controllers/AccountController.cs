@@ -18,22 +18,61 @@ namespace TenmoServer.Controllers
             this.accountDAO = accountDAO;
         }
 
-        [HttpGet]
-        public ActionResult GetLoggedInAccount()
+        private int GetUserIdFromToken()
         {
             string userIdStr = User.FindFirst("sub")?.Value;
 
-            if (userIdStr == null)
-            {
-                return Unauthorized();
-            }
+            return Convert.ToInt32(userIdStr);
+        }
 
-            int userId = Convert.ToInt32(userIdStr);
+        [HttpGet]
+        public ActionResult<Account> GetLoggedInAccount()
+        {
+            int userId = GetUserIdFromToken();
 
             Account account = accountDAO.GetAccountByUserId(userId);
 
             return Ok(account);
         }
 
+        [HttpPost("transfers")]
+        public ActionResult<API_Transfer> CreateTransfer(API_Transfer apiTransfer)
+        {
+            int currentUserId = GetUserIdFromToken();
+
+            if (apiTransfer.FromUserId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUserId);
+            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUserId);
+
+            if (fromAccount == null)
+            {
+                return BadRequest();
+            }
+
+            if (toAccount == null)
+            {
+                return BadRequest();
+            }
+
+            if (fromAccount.Balance < apiTransfer.Amount)
+            {
+                return BadRequest();
+            }
+
+            Transfer transfer = new Transfer
+            {
+                FromAccountId = fromAccount.AccountId,
+                ToAccountId = toAccount.AccountId,
+                Amount = apiTransfer.Amount,
+                TransferType = apiTransfer.TransferType,
+                TransferStatus = apiTransfer.TransferStatus
+            };
+
+            return Ok();
+        }
     }
 }

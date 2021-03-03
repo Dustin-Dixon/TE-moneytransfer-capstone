@@ -109,6 +109,17 @@ namespace TenmoClient
                         consoleService.DisplayUsers(users);
                         int toUserId = consoleService.PromptForUserID("sending to");
                         decimal amountToSend = consoleService.PromptForAmount();
+
+                        API_Transfer transfer = new API_Transfer
+                        {
+                            FromUserId = UserService.GetUserId(),
+                            ToUserId = toUserId,
+                            Amount = amountToSend,
+                            TransferType = "Send",
+                            TransferStatus = "Approve"
+                        };
+
+                        authService.CreateTransfer(transfer);
                     }
                 }
                 else if (menuSelection == 5)

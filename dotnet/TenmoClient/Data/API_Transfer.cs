@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TenmoClient.Data
+﻿namespace TenmoClient.Data
 {
-    class API_Transfer
+    public class API_Transfer
     {
-        //public int UserId
+        public int TransferId { get; set; }
+        public int FromUserId { get; set; }
+        public int ToUserId { get; set; }
+        public decimal Amount { get; set; }
+        public string TransferType { get; set; }
+        public string TransferStatus { get; set; }
     }
 }
