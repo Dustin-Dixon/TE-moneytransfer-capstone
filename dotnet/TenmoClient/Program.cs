@@ -86,7 +86,11 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-
+                    API_Account currentAccount = authService.GetCurrentAccount();
+                    if (currentAccount != null)
+                    {
+                        Console.WriteLine($"Your current account balance is: {currentAccount.Balance:C2}");
+                    }
                 }
                 else if (menuSelection == 2)
                 {
