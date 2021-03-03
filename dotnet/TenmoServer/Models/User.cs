@@ -28,4 +28,13 @@
         public string Username { get; set; }
         public string Password { get; set; }
     }
+
+    /// <summary>
+    /// Model to return only the id and username of a user
+    /// </summary>
+    public class UserInfo
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; }
+    }
 }
