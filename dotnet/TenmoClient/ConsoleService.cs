@@ -26,6 +26,35 @@ namespace TenmoClient
             }
         }
 
+        public int PromptForUserID(string action)
+        {
+            Console.WriteLine("");
+            Console.Write("Enter ID of user you are " + action + " (0 to cancel): ");
+            if (!int.TryParse(Console.ReadLine(), out int userId))
+            {
+                Console.WriteLine("Invalid input. Only input a number.");
+                return 0;
+            }
+            else
+            {
+                return userId;
+            }
+        }
+
+        public decimal PromptForAmount()
+        {
+            Console.Write("Enter amount:");
+            if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
+            {
+                Console.WriteLine("Invalid input. Only input a number.");
+                return 0;
+            }
+            else
+            {
+                return amount;
+            }
+        }
+
         public void DisplayUsers(List<UserInfo> users)
         {
             string header = "-------------------------------------------\n" +

@@ -107,6 +107,8 @@ namespace TenmoClient
                     if (users != null)
                     {
                         consoleService.DisplayUsers(users);
+                        int toUserId = consoleService.PromptForUserID("sending to");
+                        decimal amountToSend = consoleService.PromptForAmount();
                     }
                 }
                 else if (menuSelection == 5)
