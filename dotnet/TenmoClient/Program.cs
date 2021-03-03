@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -102,7 +103,11 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 4)
                 {
-
+                    List<UserInfo> users = authService.GetAllUsers();
+                    if (users != null)
+                    {
+                        consoleService.DisplayUsers(users);
+                    }
                 }
                 else if (menuSelection == 5)
                 {

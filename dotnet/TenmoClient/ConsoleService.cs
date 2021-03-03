@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -23,6 +24,20 @@ namespace TenmoClient
             {
                 return auctionId;
             }
+        }
+
+        public void DisplayUsers(List<UserInfo> users)
+        {
+            string header = "-------------------------------------------\n" +
+                            "Users\n" +
+                            "ID\t\tName\n" +
+                            "-------------------------------------------";
+            Console.WriteLine(header);
+            foreach (UserInfo user in users)
+            {
+                Console.WriteLine($"{user.UserId}\t\t{user.Username}");
+            }
+            Console.WriteLine("---------");
         }
 
         public LoginUser PromptForLogin()
