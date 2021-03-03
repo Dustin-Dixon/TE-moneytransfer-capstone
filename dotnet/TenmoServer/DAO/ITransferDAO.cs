@@ -1,6 +1,9 @@
-﻿namespace TenmoServer.DAO
+﻿using TenmoServer.Models;
+
+namespace TenmoServer.DAO
 {
-    interface ITransferDAO
+    public interface ITransferDAO
     {
+        Transfer SendMoney(Transfer transfer);
     }
 }

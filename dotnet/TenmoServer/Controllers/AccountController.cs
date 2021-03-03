@@ -12,10 +12,12 @@ namespace TenmoServer.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountDAO accountDAO;
+        private readonly ITransferDAO transferDAO;
 
-        public AccountController(IAccountDAO accountDAO)
+        public AccountController(IAccountDAO accountDAO, ITransferDAO transferDAO)
         {
             this.accountDAO = accountDAO;
+            this.transferDAO = transferDAO;
         }
 
         private int GetUserIdFromToken()
@@ -72,6 +74,7 @@ namespace TenmoServer.Controllers
                 TransferStatus = apiTransfer.TransferStatus
             };
 
+            Transfer newTransfer = transferDAO.SendMoney(transfer);
             return Ok();
         }
     }
