@@ -19,4 +19,13 @@
         public string Username { get; set; }
         public string Password { get; set; }
     }
+
+    /// <summary>
+    /// Return value from users endpoint
+    /// </summary>
+    public class UserInfo
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; }
+    }
 }

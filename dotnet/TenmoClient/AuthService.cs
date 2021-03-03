@@ -1,6 +1,7 @@
 ﻿using RestSharp;
 using RestSharp.Authenticators;
 using System;
+using System.Collections.Generic;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -74,6 +75,25 @@ namespace TenmoClient
         {
             RestRequest request = new RestRequest(API_BASE_URL + "account");
             IRestResponse<API_Account> response = client.Get<API_Account>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("An error occurred communicating with the server.");
+                return null;
+            }
+            else if (!response.IsSuccessful)
+            {
+                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
+                return null;
+            }
+
+            return response.Data;
+        }
+
+        public List<UserInfo> GetAllUsers()
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + "users");
+            IRestResponse<List<UserInfo>> response = client.Get<List<UserInfo>>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
