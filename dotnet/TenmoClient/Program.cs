@@ -116,7 +116,7 @@ namespace TenmoClient
                             ToUserId = toUserId,
                             Amount = amountToSend,
                             TransferType = "Send",
-                            TransferStatus = "Approve"
+                            TransferStatus = "Approved"
                         };
 
                         authService.CreateTransfer(transfer);
