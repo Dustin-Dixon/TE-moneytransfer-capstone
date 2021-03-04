@@ -104,9 +104,19 @@ namespace TenmoClient
                 else if (menuSelection == 4)
                 {
                     List<UserInfo> users = authService.GetAllUsers();
+
                     if (users != null)
                     {
-                        consoleService.DisplayUsers(users);
+                        List<UserInfo> displayUsers = new List<UserInfo>();
+                        foreach (UserInfo user in users)
+                        {
+                            if (user.UserId != UserService.GetUserId())
+                            {
+                                displayUsers.Add(user);
+                            }
+                        }
+
+                        consoleService.DisplayUsers(displayUsers);
                         int toUserId = consoleService.PromptForUserID("sending to");
                         decimal amountToSend = consoleService.PromptForAmount();
 
@@ -114,12 +124,10 @@ namespace TenmoClient
                         {
                             FromUserId = UserService.GetUserId(),
                             ToUserId = toUserId,
-                            Amount = amountToSend,
-                            TransferType = "Send",
-                            TransferStatus = "Approved"
+                            Amount = amountToSend
                         };
 
-                        authService.CreateTransfer(transfer);
+                        authService.SendTransfer(transfer);
                     }
                 }
                 else if (menuSelection == 5)
