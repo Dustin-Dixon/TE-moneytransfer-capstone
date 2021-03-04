@@ -57,7 +57,7 @@ namespace TenmoServer.DAO
 
                 SqlCommand command = new SqlCommand(query, conn);
                 command.Parameters.AddWithValue("@balance", account.Balance);
-                command.Parameters.AddWithValue("@account_id", account.AccountId);
+                command.Parameters.AddWithValue("@accountId", account.AccountId);
 
                 int rowsUpdated = command.ExecuteNonQuery();
 
