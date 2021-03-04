@@ -68,6 +68,7 @@ namespace TenmoServer.DAO
         }
 
         private Transfer CreateTransfer(Transfer transfer)
+        public Transfer CreateTransfer(Transfer transfer)
         {
             Transfer newTransfer = null;
 
