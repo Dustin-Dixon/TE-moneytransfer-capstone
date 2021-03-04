@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.SqlClient;
-using System.Transactions;
 using TenmoServer.Models;
 
 namespace TenmoServer.DAO
@@ -14,60 +13,6 @@ namespace TenmoServer.DAO
             this.connectionString = connectionString;
         }
 
-        public Transfer SendMoney(Transfer transfer)
-        {
-            Transfer newTransfer = null;
-
-            try
-            {
-                using (TransactionScope transaction = new TransactionScope())
-                {
-                    if (!AddToBalance(transfer.ToAccountId, transfer.Amount))
-                    {
-                        throw new Exception("Failed to update balance of destination account.");
-                    }
-                    if (!AddToBalance(transfer.FromAccountId, -transfer.Amount))
-                    {
-                        throw new Exception("Failed to update balance of source account.");
-                    }
-
-                    newTransfer = CreateTransfer(transfer);
-                    if (newTransfer == null)
-                    {
-                        throw new Exception("Failed to create record of transfer.");
-                    }
-
-                    transaction.Complete();
-                }
-            }
-            catch (SqlException)
-            {
-                throw;
-            }
-
-            return newTransfer;
-        }
-
-        private bool AddToBalance(int accountId, decimal amount)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-
-                string query = "UPDATE accounts " +
-                               "SET balance = balance + @amount " +
-                               "WHERE account_id = @accountId;";
-
-                SqlCommand command = new SqlCommand(query, conn);
-                command.Parameters.AddWithValue("@amount", amount);
-                command.Parameters.AddWithValue("@accountId", accountId);
-
-                int rowsUpdated = command.ExecuteNonQuery();
-                return (rowsUpdated == 1);
-            }
-        }
-
-        private Transfer CreateTransfer(Transfer transfer)
         public Transfer CreateTransfer(Transfer transfer)
         {
             Transfer newTransfer = null;
