@@ -36,7 +36,7 @@ namespace TenmoServer.Controllers
             return Ok(account);
         }
 
-        [HttpPost("transfers")]
+        [HttpPost("transfers/send")]
         public ActionResult<API_Transfer> CreateTransfer(API_Transfer apiTransfer)
         {
             int currentUserId = GetUserIdFromToken();
