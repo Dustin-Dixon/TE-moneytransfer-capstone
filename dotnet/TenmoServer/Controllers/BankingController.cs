@@ -49,6 +49,11 @@ namespace TenmoServer.Controllers
             Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUserId);
             Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUserId);
 
+            if (apiTransfer.FromUserId == apiTransfer.ToUserId)
+            {
+                return BadRequest();
+            }
+
             if (fromAccount == null)
             {
                 return BadRequest();
