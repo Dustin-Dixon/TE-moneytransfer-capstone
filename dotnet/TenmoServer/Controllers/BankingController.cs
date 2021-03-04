@@ -8,13 +8,12 @@ namespace TenmoServer.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("[controller]")]
-    public class AccountController : ControllerBase
+    public class BankingController : ControllerBase
     {
         private readonly IAccountDAO accountDAO;
         private readonly ITransferDAO transferDAO;
 
-        public AccountController(IAccountDAO accountDAO, ITransferDAO transferDAO)
+        public BankingController(IAccountDAO accountDAO, ITransferDAO transferDAO)
         {
             this.accountDAO = accountDAO;
             this.transferDAO = transferDAO;
@@ -27,7 +26,7 @@ namespace TenmoServer.Controllers
             return Convert.ToInt32(userIdStr);
         }
 
-        [HttpGet]
+        [HttpGet("account")]
         public ActionResult<Account> GetLoggedInAccount()
         {
             int userId = GetUserIdFromToken();
@@ -65,17 +64,26 @@ namespace TenmoServer.Controllers
                 return BadRequest();
             }
 
-            Transfer transfer = new Transfer
+            if (apiTransfer.Amount <= 0)
+            {
+                return BadRequest();
+            }
+
+            Transfer transfer = new Transfer(apiTransfer)
             {
                 FromAccountId = fromAccount.AccountId,
-                ToAccountId = toAccount.AccountId,
-                Amount = apiTransfer.Amount,
-                TransferType = apiTransfer.TransferType,
-                TransferStatus = apiTransfer.TransferStatus
+                ToAccountId = toAccount.AccountId
             };
 
             Transfer newTransfer = transferDAO.SendMoney(transfer);
-            return Ok();
+
+            API_Transfer returnTransfer = new API_Transfer(newTransfer)
+            {
+                FromUserId = apiTransfer.FromUserId,
+                ToUserId = apiTransfer.ToUserId
+            };
+
+            return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
         }
     }
 }
