@@ -21,12 +21,26 @@ namespace TenmoServer.DAO
             {
                 conn.Open();
 
-                string query = "INSERT INTO transfers " +
+                string query = "DECLARE @typeId INT = " +
+                               "(" +
+                               "    SELECT transfer_type_id " +
+                               "    FROM transfer_types " +
+                               "    WHERE transfer_type_desc = @transferType" +
+                               ");" +
+                               "DECLARE @statusId INT = " +
+                               "(" +
+                               "    SELECT transfer_status_id " +
+                               "    FROM transfer_statuses " +
+                               "    WHERE transfer_status_desc = @transferStatus" +
+                               ");" +
+                               "INSERT INTO transfers " +
                                "(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                               "VALUES (2, 2, @accountFrom, @accountTo, @amount);" +
+                               "VALUES (@typeId, @statusId, @accountFrom, @accountTo, @amount);" +
                                "SELECT SCOPE_IDENTITY();";
 
                 SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@transferType", transfer.TransferType);
+                command.Parameters.AddWithValue("@transferStatus", transfer.TransferStatus);
                 command.Parameters.AddWithValue("@accountFrom", transfer.FromAccountId);
                 command.Parameters.AddWithValue("@accountTo", transfer.ToAccountId);
                 command.Parameters.AddWithValue("@amount", transfer.Amount);
