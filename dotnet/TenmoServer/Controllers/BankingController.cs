@@ -198,6 +198,31 @@ namespace TenmoServer.Controllers
             return Ok(apiTransfers);
         }
 
+        [HttpGet("transfers/pending")]
+        public ActionResult<List<API_Transfer>> PendingTransfers()
+        {
+            int userId = GetUserIdFromToken();
+            Account account = accountDAO.GetAccountByUserId(userId);
+            if (account == null)
+            {
+                // TODO: Is there better error code?
+                return StatusCode(500);
+            }
+            List<Transfer> transfers = transferDAO.GetTransfersByAccountId(account.AccountId);
+
+            //convert List to API_Transfers
+            List<API_Transfer> apiTransfers = new List<API_Transfer>();
+            foreach (Transfer transfer in transfers)
+            {
+                if (transfer.TransferStatus == "Pending" && account.AccountId == transfer.FromAccountId)
+                {
+                    apiTransfers.Add(ConvertTransferToApiTransfer(transfer));
+                }
+            }
+
+            return Ok(apiTransfers);
+        }
+
         [HttpGet("transfers/{id}")]
         public ActionResult<API_Transfer> GetTransferById(int id)
         {

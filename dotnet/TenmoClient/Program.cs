@@ -113,7 +113,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 3)
                 {
-
+                    // TODO: link up client here
                 }
                 else if (menuSelection == 4)
                 {
