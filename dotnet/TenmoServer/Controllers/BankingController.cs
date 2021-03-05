@@ -45,22 +45,22 @@ namespace TenmoServer.Controllers
         {
             // Ensure that the logged in user is the source account of the money
             int currentUserId = GetUserIdFromToken();
-            if (apiTransfer.FromUserId != currentUserId)
+            if (apiTransfer.FromUser.UserId != currentUserId)
             {
                 // TODO: Better return message
                 return Forbid();
             }
 
             // Ensure that the account isn't sending money to itself
-            if (apiTransfer.FromUserId == apiTransfer.ToUserId)
+            if (apiTransfer.FromUser.UserId == apiTransfer.ToUser.UserId)
             {
                 // TODO: Better return message
                 return BadRequest();
             }
 
             // Get accounts from the account IDs in the transfer
-            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUserId);
-            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUserId);
+            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId);
+            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId);
 
             // Check that the account IDs actually correspond to accounts.
             if (fromAccount == null)
@@ -114,8 +114,8 @@ namespace TenmoServer.Controllers
             // Translate the created transfer back into API representation
             API_Transfer returnTransfer = new API_Transfer(newTransfer)
             {
-                FromUserId = apiTransfer.FromUserId,
-                ToUserId = apiTransfer.ToUserId
+                FromUser = apiTransfer.FromUser,
+                ToUser = apiTransfer.ToUser
             };
 
             return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
@@ -137,10 +137,13 @@ namespace TenmoServer.Controllers
             List<API_Transfer> apiTransfers = new List<API_Transfer>();
             foreach (Transfer transfer in transfers)
             {
+                User fromUser = userDAO.GetUserByAccountId(transfer.FromAccountId);
+                User toUser = userDAO.GetUserByAccountId(transfer.ToAccountId);
+
                 API_Transfer toAdd = new API_Transfer(transfer)
                 {
-                    FromUserId = userDAO.GetUserByAccountId(transfer.FromAccountId).UserId,
-                    ToUserId = userDAO.GetUserByAccountId(transfer.ToAccountId).UserId
+                    FromUser = new UserInfo(fromUser),
+                    ToUser = new UserInfo(toUser)
                 };
                 apiTransfers.Add(toAdd);
             }

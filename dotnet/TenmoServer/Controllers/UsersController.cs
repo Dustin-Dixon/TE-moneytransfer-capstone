@@ -35,6 +35,5 @@ namespace TenmoServer.Controllers
 
             return Ok(output);
         }
-
     }
 }

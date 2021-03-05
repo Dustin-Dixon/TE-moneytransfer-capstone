@@ -121,10 +121,18 @@ namespace TenmoClient
                         int toUserId = consoleService.PromptForUserID("sending to");
                         decimal amountToSend = consoleService.PromptForAmount();
 
+                        UserInfo fromUser = new UserInfo()
+                        {
+                            UserId = UserService.GetUserId()
+                        };
+                        UserInfo toUser = new UserInfo()
+                        {
+                            UserId = toUserId
+                        };
                         API_Transfer transfer = new API_Transfer
                         {
-                            FromUserId = UserService.GetUserId(),
-                            ToUserId = toUserId,
+                            FromUser = fromUser,
+                            ToUser = toUser,
                             Amount = amountToSend
                         };
 
