@@ -131,24 +131,50 @@ namespace TenmoServer.Controllers
                 // TODO: Is there better error code?
                 return StatusCode(500);
             }
-            List<Transfer> transfers = transferDAO.GetTransfers(account.AccountId);
+            List<Transfer> transfers = transferDAO.GetTransfersByAccountId(account.AccountId);
 
             //convert List to API_Transfers
             List<API_Transfer> apiTransfers = new List<API_Transfer>();
             foreach (Transfer transfer in transfers)
             {
-                User fromUser = userDAO.GetUserByAccountId(transfer.FromAccountId);
-                User toUser = userDAO.GetUserByAccountId(transfer.ToAccountId);
-
-                API_Transfer toAdd = new API_Transfer(transfer)
-                {
-                    FromUser = new UserInfo(fromUser),
-                    ToUser = new UserInfo(toUser)
-                };
-                apiTransfers.Add(toAdd);
+                apiTransfers.Add(ConvertTransferToApiTransfer(transfer));
             }
 
             return Ok(apiTransfers);
+        }
+
+        [HttpGet("transfers/{id}")]
+        public ActionResult<API_Transfer> GetTransferById(int id)
+        {
+            Transfer transfer = transferDAO.GetTransferById(id);
+
+            if(transfer == null)
+            {
+                return NotFound();
+            }
+
+            API_Transfer apiTransfer = ConvertTransferToApiTransfer(transfer);
+            int userId = GetUserIdFromToken();
+            if(apiTransfer.FromUser.UserId != userId && apiTransfer.ToUser.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            return Ok(apiTransfer);
+        }
+
+        private API_Transfer ConvertTransferToApiTransfer(Transfer transfer)
+        {
+            User fromUser = userDAO.GetUserByAccountId(transfer.FromAccountId);
+            User toUser = userDAO.GetUserByAccountId(transfer.ToAccountId);
+
+            API_Transfer apiTransfer = new API_Transfer(transfer)
+            {
+                FromUser = new UserInfo(fromUser),
+                ToUser = new UserInfo(toUser)
+            };
+
+            return apiTransfer;
         }
     }
 }

@@ -57,7 +57,7 @@ namespace TenmoServer.DAO
             return newTransfer;
         }
 
-        public List<Transfer> GetTransfers(int accountId)
+        public List<Transfer> GetTransfersByAccountId(int accountId)
         {
             List<Transfer> transfers = new List<Transfer>();
 
@@ -90,6 +90,40 @@ namespace TenmoServer.DAO
             }
 
             return transfers;
+        }
+
+        public Transfer GetTransferById(int transferId)
+        {
+            Transfer t = null;
+
+            try
+            {
+                using(SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = "SELECT transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, " +
+                                   "account_from, account_to, amount " +
+                                   "FROM transfers " +
+                                   "JOIN transfer_types AS tt ON tt.transfer_type_id = transfers.transfer_type_id " +
+                                   "JOIN transfer_statuses AS ts ON ts.transfer_status_id = transfers.transfer_status_id " +
+                                   "WHERE transfer_id = @transferId;";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@transferId", transferId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        t = GetTransferFromReader(reader);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return t;
         }
 
         private Transfer GetTransferFromReader(SqlDataReader reader)
