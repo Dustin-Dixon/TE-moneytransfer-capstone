@@ -112,11 +112,66 @@ namespace TenmoServer.Controllers
             }
 
             // Translate the created transfer back into API representation
-            API_Transfer returnTransfer = new API_Transfer(newTransfer)
+            API_Transfer returnTransfer = ConvertTransferToApiTransfer(newTransfer);
+
+            return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
+        }
+
+        [HttpPost("transfers/request")]
+        public ActionResult<API_Transfer> RequestTransfer(API_Transfer apiTransfer)
+        {
+            // Ensure that the logged in user is the source account of the money
+            int currentUserId = GetUserIdFromToken();
+            if (apiTransfer.ToUser.UserId != currentUserId)
             {
-                FromUser = apiTransfer.FromUser,
-                ToUser = apiTransfer.ToUser
+                // TODO: Better return message
+                return Forbid();
+            }
+
+            // Ensure that the account isn't sending money to itself
+            if (apiTransfer.FromUser.UserId == apiTransfer.ToUser.UserId)
+            {
+                // TODO: Better return message
+                return BadRequest();
+            }
+
+            // Get accounts from the account IDs in the transfer
+            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId);
+            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId);
+
+            // Check that the account IDs actually correspond to accounts.
+            if (fromAccount == null)
+            {
+                // TODO: Better return message
+                return BadRequest();
+            }
+
+            if (toAccount == null)
+            {
+                // TODO: Better return message
+                return BadRequest();
+            }
+
+            // TODO: Move validation to model
+            if (apiTransfer.Amount <= 0)
+            {
+                return BadRequest();
+            }
+
+            // Translate API transfer to dao transfer
+            Transfer transfer = new Transfer(apiTransfer)
+            {
+                FromAccountId = fromAccount.AccountId,
+                ToAccountId = toAccount.AccountId,
+                TransferType = "Request",
+                TransferStatus = "Pending"
             };
+
+            Transfer newTransfer = null;
+                newTransfer = transferDAO.CreateTransfer(transfer);
+
+            // Translate the created transfer back into API representation
+            API_Transfer returnTransfer = ConvertTransferToApiTransfer(newTransfer);
 
             return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
         }
