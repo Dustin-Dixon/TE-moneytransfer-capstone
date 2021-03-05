@@ -95,7 +95,8 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
-
+                    // call ViewTransfers server side
+                    // call ListUsers server side
                 }
                 else if (menuSelection == 3)
                 {

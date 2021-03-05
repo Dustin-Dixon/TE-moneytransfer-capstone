@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Transactions;
 using TenmoServer.DAO;
 using TenmoServer.Models;
@@ -116,6 +117,24 @@ namespace TenmoServer.Controllers
             };
 
             return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
+        }
+
+        [HttpGet("transfers")]
+        public ActionResult<List<API_Transfer>> ViewTransfers()
+        {
+            int userId = GetUserIdFromToken();
+            Account account = accountDAO.GetAccountByUserId(userId);
+            if (account == null)
+            {
+                // TODO: Is there better error code?
+                return StatusCode(500);
+            }
+            List<Transfer> transfers = transferDAO.GetTransfers(account.AccountId);
+
+            //convert List to API_Transfers
+            // TODO: pickup here tomorrow
+
+            return Ok();
         }
     }
 }

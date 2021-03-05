@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using TenmoServer.Models;
 
@@ -54,6 +55,56 @@ namespace TenmoServer.DAO
             }
 
             return newTransfer;
+        }
+
+        public List<Transfer> GetTransfers(int accountId)
+        {
+            List<Transfer> transfers = null;
+
+            try
+            {
+                using(SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = "SELECT transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, " +
+                                   "account_from, account_to, amount " +
+                                   "FROM transfers " +
+                                   "JOIN transfer_types AS tt ON tt.transfer_type_id = transfers.transfer_type_id " +
+                                   "JOIN transfer_statuses AS ts ON ts.transfer_status_id = transfers.transfer_status_id " +
+                                   "WHERE account_from = @accountId OR account_to = @accountId";
+                    
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@accountId", accountId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        transfers.Add(GetTransferFromReader(reader));
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return transfers;
+        }
+
+        private Transfer GetTransferFromReader(SqlDataReader reader)
+        {
+            Transfer t = new Transfer()
+            {
+                TransferId = Convert.ToInt32(reader["transfer_id"]),
+                TransferType = Convert.ToString(reader["transfer_type_desc"]),
+                TransferStatus = Convert.ToString(reader["transfer_status_desc"]),
+                FromAccountId = Convert.ToInt32(reader["account_from"]),
+                ToAccountId = Convert.ToInt32(reader["account_to"]),
+                Amount = Convert.ToDecimal(reader["amount"])
+            };
+
+            return t;
         }
     }
 }
