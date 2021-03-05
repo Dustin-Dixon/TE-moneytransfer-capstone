@@ -122,24 +122,27 @@ namespace TenmoClient
 
                         consoleService.DisplayUsers(displayUsers);
                         int toUserId = consoleService.PromptForUserID("sending to");
-                        decimal amountToSend = consoleService.PromptForAmount();
+                        if (toUserId != 0)
+                        {
+                            decimal amountToSend = consoleService.PromptForAmount();
 
-                        UserInfo fromUser = new UserInfo()
-                        {
-                            UserId = UserService.GetUserId()
-                        };
-                        UserInfo toUser = new UserInfo()
-                        {
-                            UserId = toUserId
-                        };
-                        API_Transfer transfer = new API_Transfer
-                        {
-                            FromUser = fromUser,
-                            ToUser = toUser,
-                            Amount = amountToSend
-                        };
+                            UserInfo fromUser = new UserInfo()
+                            {
+                                UserId = UserService.GetUserId()
+                            };
+                            UserInfo toUser = new UserInfo()
+                            {
+                                UserId = toUserId
+                            };
+                            API_Transfer transfer = new API_Transfer
+                            {
+                                FromUser = fromUser,
+                                ToUser = toUser,
+                                Amount = amountToSend
+                            };
 
-                        authService.SendTransfer(transfer);
+                            authService.SendTransfer(transfer);
+                        }
                     }
                 }
                 else if (menuSelection == 5)
