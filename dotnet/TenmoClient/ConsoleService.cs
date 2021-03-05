@@ -113,5 +113,34 @@ namespace TenmoClient
             Console.WriteLine("");
             return pass;
         }
+
+        public void DisplayTransfers(List<API_Transfer> transfers)
+        {
+            string header = "-------------------------------------------\n" +
+                            "Transfers\n" +
+                            "ID\t\tFrom/To\t\t\tAmount\n" +
+                            "-------------------------------------------";
+            Console.WriteLine(header);
+            int userId = UserService.GetUserId();
+            foreach (API_Transfer transfer in transfers)
+            {
+                string fromOrTo;
+                string username;
+                if (transfer.FromUser.UserId == userId)
+                {
+                    fromOrTo = "To:";
+                    username = transfer.ToUser.Username;
+                }
+                else
+                {
+                    fromOrTo = "From:";
+                    username = transfer.FromUser.Username;
+                }
+                Console.WriteLine($"{transfer.TransferId}\t\t{fromOrTo}\t{username}\t\t{transfer.Amount:C2}");
+            }
+            Console.WriteLine("---------");
+        }
+
+
     }
 }

@@ -96,7 +96,10 @@ namespace TenmoClient
                 else if (menuSelection == 2)
                 {
                     // call ViewTransfers server side
+                    List<API_Transfer> transfers = authService.GetTransfers();
+                    consoleService.DisplayTransfers(transfers);
                     // call ListUsers server side
+
                 }
                 else if (menuSelection == 3)
                 {
