@@ -141,6 +141,18 @@ namespace TenmoClient
             Console.WriteLine("---------");
         }
 
-
+        public void DisplayTransferDetails(API_Transfer transfer)
+        {
+            string header = "-------------------------------------------\n" +
+                            "Transfer Details\n" +
+                            "-------------------------------------------";
+            Console.WriteLine(header);
+            Console.WriteLine($"Id: {transfer.TransferId}");
+            Console.WriteLine($"From: {transfer.FromUser.Username}");
+            Console.WriteLine($"To: {transfer.ToUser.Username}");
+            Console.WriteLine($"Type: {transfer.TransferType}");
+            Console.WriteLine($"Status: {transfer.TransferStatus}");
+            Console.WriteLine($"Amount: {transfer.Amount:C2}");
+        }
     }
 }

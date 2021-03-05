@@ -97,9 +97,19 @@ namespace TenmoClient
                 {
                     // call ViewTransfers server side
                     List<API_Transfer> transfers = authService.GetTransfers();
-                    consoleService.DisplayTransfers(transfers);
-                    // call ListUsers server side
-
+                    if (transfers != null)
+                    {
+                        consoleService.DisplayTransfers(transfers);
+                        int transferId = consoleService.PromptForTransferID("view details");
+                        if (transferId != 0)
+                        {
+                            API_Transfer transferToView = authService.GetTransferById(transferId);
+                            if (transferToView != null)
+                            {
+                                consoleService.DisplayTransferDetails(transferToView);
+                            }
+                        }
+                    }
                 }
                 else if (menuSelection == 3)
                 {
