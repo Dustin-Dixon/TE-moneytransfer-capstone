@@ -59,7 +59,7 @@ namespace TenmoServer.DAO
 
         public List<Transfer> GetTransfers(int accountId)
         {
-            List<Transfer> transfers = null;
+            List<Transfer> transfers = new List<Transfer>();
 
             try
             {

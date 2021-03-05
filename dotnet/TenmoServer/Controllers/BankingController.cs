@@ -14,11 +14,13 @@ namespace TenmoServer.Controllers
     {
         private readonly IAccountDAO accountDAO;
         private readonly ITransferDAO transferDAO;
+        private readonly IUserDAO userDAO;
 
-        public BankingController(IAccountDAO accountDAO, ITransferDAO transferDAO)
+        public BankingController(IAccountDAO accountDAO, ITransferDAO transferDAO, IUserDAO userDAO)
         {
             this.accountDAO = accountDAO;
             this.transferDAO = transferDAO;
+            this.userDAO = userDAO;
         }
 
         private int GetUserIdFromToken()
@@ -132,9 +134,18 @@ namespace TenmoServer.Controllers
             List<Transfer> transfers = transferDAO.GetTransfers(account.AccountId);
 
             //convert List to API_Transfers
-            // TODO: pickup here tomorrow
+            List<API_Transfer> apiTransfers = new List<API_Transfer>();
+            foreach (Transfer transfer in transfers)
+            {
+                API_Transfer toAdd = new API_Transfer(transfer)
+                {
+                    FromUserId = userDAO.GetUserByAccountId(transfer.FromAccountId).UserId,
+                    ToUserId = userDAO.GetUserByAccountId(transfer.ToAccountId).UserId
+                };
+                apiTransfers.Add(toAdd);
+            }
 
-            return Ok();
+            return Ok(apiTransfers);
         }
     }
 }
