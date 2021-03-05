@@ -151,13 +151,49 @@ namespace TenmoClient
                                 Amount = amountToSend
                             };
 
-                            authService.SendTransfer(transfer);
+                            authService.SendTransfer(transfer, "send");
                         }
                     }
                 }
                 else if (menuSelection == 5)
                 {
+                    List<UserInfo> users = authService.GetAllUsers();
 
+                    if (users != null)
+                    {
+                        List<UserInfo> displayUsers = new List<UserInfo>();
+                        foreach (UserInfo user in users)
+                        {
+                            if (user.UserId != UserService.GetUserId())
+                            {
+                                displayUsers.Add(user);
+                            }
+                        }
+
+                        consoleService.DisplayUsers(displayUsers);
+                        int fromUserId = consoleService.PromptForUserID("requesting from");
+                        if (fromUserId != 0)
+                        {
+                            decimal amountToSend = consoleService.PromptForAmount();
+
+                            UserInfo fromUser = new UserInfo()
+                            {
+                                UserId = fromUserId
+                            };
+                            UserInfo toUser = new UserInfo()
+                            {
+                                UserId = UserService.GetUserId()
+                            };
+                            API_Transfer transfer = new API_Transfer
+                            {
+                                FromUser = fromUser,
+                                ToUser = toUser,
+                                Amount = amountToSend
+                            };
+
+                            authService.SendTransfer(transfer, "request");
+                        }
+                    }
                 }
                 else if (menuSelection == 6)
                 {

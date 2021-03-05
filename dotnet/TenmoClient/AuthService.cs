@@ -109,9 +109,9 @@ namespace TenmoClient
             return response.Data;
         }
 
-        public API_Transfer SendTransfer(API_Transfer transfer)
+        public API_Transfer SendTransfer(API_Transfer transfer, string endpoint)
         {
-            RestRequest request = new RestRequest(API_BASE_URL + "transfers/send");
+            RestRequest request = new RestRequest(API_BASE_URL + $"transfers/{endpoint}");
             request.AddJsonBody(transfer);
 
             IRestResponse<API_Transfer> response = client.Post<API_Transfer>(request);
