@@ -30,11 +30,14 @@ namespace TenmoServer.Controllers
             return Convert.ToInt32(userIdStr);
         }
 
+        // Get account info of current logged in user.
         [HttpGet("account")]
         public ActionResult<Account> GetLoggedInAccount()
         {
             int userId = GetUserIdFromToken();
 
+            // User is already authenticated so they must have an account.
+            // This cannot return null.
             Account account = accountDAO.GetAccountByUserId(userId);
 
             return Ok(account);
@@ -47,45 +50,24 @@ namespace TenmoServer.Controllers
             int currentUserId = GetUserIdFromToken();
             if (apiTransfer.FromUser.UserId != currentUserId)
             {
-                // TODO: Better return message
+                // Cannot return a "forbid" message unless we use a bare 'StatusResult' which would bypass
+                // asp.net authentication handling functionality
                 return Forbid();
             }
 
-            // Ensure that the account isn't sending money to itself
-            if (apiTransfer.FromUser.UserId == apiTransfer.ToUser.UserId)
-            {
-                // TODO: Better return message
-                return BadRequest();
-            }
+            GetAccountsFromTransfer(apiTransfer, out Account fromAccount, out Account toAccount);
 
-            // Get accounts from the account IDs in the transfer
-            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
-            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
-
-            // Check that the account IDs actually correspond to accounts.
-            if (fromAccount == null)
+            ActionResult validationResult = ValidateAccounts(fromAccount, toAccount);
+            if (validationResult != null)
             {
-                // TODO: Better return message
-                return BadRequest();
-            }
-
-            if (toAccount == null)
-            {
-                // TODO: Better return message
-                return BadRequest();
+                return validationResult;
             }
 
             // Cannot send more money than the source account has
             if (fromAccount.Balance < apiTransfer.Amount)
             {
                 // TODO: Better return message
-                return BadRequest();
-            }
-
-            // TODO: Move validation to model
-            if (apiTransfer.Amount <= 0)
-            {
-                return BadRequest();
+                return BadRequest("You cannot send more money than you currently have");
             }
 
             // Translate API transfer to dao transfer
@@ -120,7 +102,7 @@ namespace TenmoServer.Controllers
         [HttpPost("transfers/request")]
         public ActionResult<API_Transfer> RequestTransfer(API_Transfer apiTransfer)
         {
-            // Ensure that the logged in user is the source account of the money
+            // Ensure that the logged in user is the destination account of the money
             int currentUserId = GetUserIdFromToken();
             if (apiTransfer.ToUser.UserId != currentUserId)
             {
@@ -128,34 +110,12 @@ namespace TenmoServer.Controllers
                 return Forbid();
             }
 
-            // Ensure that the account isn't sending money to itself
-            if (apiTransfer.FromUser.UserId == apiTransfer.ToUser.UserId)
-            {
-                // TODO: Better return message
-                return BadRequest();
-            }
+            GetAccountsFromTransfer(apiTransfer, out Account fromAccount, out Account toAccount);
 
-            // Get accounts from the account IDs in the transfer
-            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
-            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
-
-            // Check that the account IDs actually correspond to accounts.
-            if (fromAccount == null)
+            ActionResult validationResult = ValidateAccounts(fromAccount, toAccount);
+            if (validationResult != null)
             {
-                // TODO: Better return message
-                return BadRequest();
-            }
-
-            if (toAccount == null)
-            {
-                // TODO: Better return message
-                return BadRequest();
-            }
-
-            // TODO: Move validation to model
-            if (apiTransfer.Amount <= 0)
-            {
-                return BadRequest();
+                return validationResult;
             }
 
             // Translate API transfer to dao transfer
@@ -167,8 +127,7 @@ namespace TenmoServer.Controllers
                 TransferStatus = "Pending"
             };
 
-            Transfer newTransfer = null;
-                newTransfer = transferDAO.CreateTransfer(transfer);
+            Transfer newTransfer = transferDAO.CreateTransfer(transfer);
 
             // Translate the created transfer back into API representation
             API_Transfer returnTransfer = ConvertTransferToApiTransfer(newTransfer);
@@ -176,16 +135,41 @@ namespace TenmoServer.Controllers
             return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
         }
 
+        private void GetAccountsFromTransfer(API_Transfer apiTransfer, out Account fromAccount, out Account toAccount)
+        {
+            // Get accounts from the account IDs in the transfer
+            fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
+            toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
+        }
+
+        private ActionResult ValidateAccounts(Account fromAccount, Account toAccount)
+        {
+            // Check that the account IDs actually correspond to accounts.
+            if (fromAccount == null)
+            {
+                return NotFound("The specified UserId does not correspond to an account");
+            }
+
+            if (toAccount == null)
+            {
+                return NotFound("The specified UserId does not correspond to an account");
+            }
+
+            // Ensure that the account isn't sending money to itself
+            if (fromAccount.AccountId == toAccount.AccountId)
+            {
+                return BadRequest("Cannot create transfer where source and destination account are the same");
+            }
+
+            return null;
+        }
+
         [HttpGet("transfers")]
         public ActionResult<List<API_Transfer>> ViewTransfers()
         {
             int userId = GetUserIdFromToken();
+
             Account account = accountDAO.GetAccountByUserId(userId);
-            if (account == null)
-            {
-                // TODO: Is there better error code?
-                return StatusCode(500);
-            }
             List<Transfer> transfers = transferDAO.GetTransfersByAccountId(account.AccountId);
 
             //convert List to API_Transfers
@@ -202,18 +186,15 @@ namespace TenmoServer.Controllers
         public ActionResult<List<API_Transfer>> PendingTransfers()
         {
             int userId = GetUserIdFromToken();
+
             Account account = accountDAO.GetAccountByUserId(userId);
-            if (account == null)
-            {
-                // TODO: Is there better error code?
-                return StatusCode(500);
-            }
             List<Transfer> transfers = transferDAO.GetTransfersByAccountId(account.AccountId);
 
             //convert List to API_Transfers
             List<API_Transfer> apiTransfers = new List<API_Transfer>();
             foreach (Transfer transfer in transfers)
             {
+                // TODO: do filtering on dao side
                 if (transfer.TransferStatus == "Pending" && account.AccountId == transfer.FromAccountId)
                 {
                     apiTransfers.Add(ConvertTransferToApiTransfer(transfer));
@@ -228,14 +209,15 @@ namespace TenmoServer.Controllers
         {
             Transfer transfer = transferDAO.GetTransferById(id);
 
-            if(transfer == null)
+            if (transfer == null)
             {
-                return NotFound();
+                return NotFound("Could not find transfer with the provided id");
             }
 
             API_Transfer apiTransfer = ConvertTransferToApiTransfer(transfer);
+
             int userId = GetUserIdFromToken();
-            if(apiTransfer.FromUser.UserId != userId && apiTransfer.ToUser.UserId != userId)
+            if (apiTransfer.FromUser.UserId != userId && apiTransfer.ToUser.UserId != userId)
             {
                 return Forbid();
             }
