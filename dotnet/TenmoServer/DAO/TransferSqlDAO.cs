@@ -63,7 +63,7 @@ namespace TenmoServer.DAO
 
             try
             {
-                using(SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
 
@@ -73,7 +73,7 @@ namespace TenmoServer.DAO
                                    "JOIN transfer_types AS tt ON tt.transfer_type_id = transfers.transfer_type_id " +
                                    "JOIN transfer_statuses AS ts ON ts.transfer_status_id = transfers.transfer_status_id " +
                                    "WHERE account_from = @accountId OR account_to = @accountId";
-                    
+
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@accountId", accountId);
 
@@ -98,7 +98,7 @@ namespace TenmoServer.DAO
 
             try
             {
-                using(SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
 

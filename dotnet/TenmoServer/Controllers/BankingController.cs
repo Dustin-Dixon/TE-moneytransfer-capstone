@@ -23,13 +23,6 @@ namespace TenmoServer.Controllers
             this.userDAO = userDAO;
         }
 
-        private int GetUserIdFromToken()
-        {
-            string userIdStr = User.FindFirst("sub")?.Value;
-
-            return Convert.ToInt32(userIdStr);
-        }
-
         // Get account info of current logged in user.
         [HttpGet("account")]
         public ActionResult<Account> GetLoggedInAccount()
@@ -135,35 +128,6 @@ namespace TenmoServer.Controllers
             return Created($"/transfers/{returnTransfer.TransferId}", returnTransfer);
         }
 
-        private void GetAccountsFromTransfer(API_Transfer apiTransfer, out Account fromAccount, out Account toAccount)
-        {
-            // Get accounts from the account IDs in the transfer
-            fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
-            toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
-        }
-
-        private ActionResult ValidateAccounts(Account fromAccount, Account toAccount)
-        {
-            // Check that the account IDs actually correspond to accounts.
-            if (fromAccount == null)
-            {
-                return NotFound("The specified UserId does not correspond to an account");
-            }
-
-            if (toAccount == null)
-            {
-                return NotFound("The specified UserId does not correspond to an account");
-            }
-
-            // Ensure that the account isn't sending money to itself
-            if (fromAccount.AccountId == toAccount.AccountId)
-            {
-                return BadRequest("Cannot create transfer where source and destination account are the same");
-            }
-
-            return null;
-        }
-
         [HttpGet("transfers")]
         public ActionResult<List<API_Transfer>> ViewTransfers()
         {
@@ -223,6 +187,42 @@ namespace TenmoServer.Controllers
             }
 
             return Ok(apiTransfer);
+        }
+
+        private int GetUserIdFromToken()
+        {
+            string userIdStr = User.FindFirst("sub")?.Value;
+
+            return Convert.ToInt32(userIdStr);
+        }
+
+        private void GetAccountsFromTransfer(API_Transfer apiTransfer, out Account fromAccount, out Account toAccount)
+        {
+            // Get accounts from the account IDs in the transfer
+            fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
+            toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
+        }
+
+        private ActionResult ValidateAccounts(Account fromAccount, Account toAccount)
+        {
+            // Check that the account IDs actually correspond to accounts.
+            if (fromAccount == null)
+            {
+                return NotFound("The specified UserId does not correspond to an account");
+            }
+
+            if (toAccount == null)
+            {
+                return NotFound("The specified UserId does not correspond to an account");
+            }
+
+            // Ensure that the account isn't sending money to itself
+            if (fromAccount.AccountId == toAccount.AccountId)
+            {
+                return BadRequest("Cannot create transfer where source and destination account are the same");
+            }
+
+            return null;
         }
 
         private API_Transfer ConvertTransferToApiTransfer(Transfer transfer)
