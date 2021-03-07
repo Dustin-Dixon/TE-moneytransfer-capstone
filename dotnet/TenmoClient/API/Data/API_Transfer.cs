@@ -8,5 +8,7 @@
         public decimal Amount { get; set; }
         public string TransferType { get; set; }
         public string TransferStatus { get; set; }
+
+        public string Message { get; set; }
     }
 }

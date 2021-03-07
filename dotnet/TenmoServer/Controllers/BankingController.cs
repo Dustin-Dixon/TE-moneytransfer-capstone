@@ -60,7 +60,7 @@ namespace TenmoServer.Controllers
             if (fromAccount.Balance < apiTransfer.Amount)
             {
                 // TODO: Better return message
-                return BadRequest("You cannot send more money than you currently have");
+                return BadRequest(new { message = "You cannot send more money than you currently have" });
             }
 
             // Translate API transfer to dao transfer
@@ -175,7 +175,7 @@ namespace TenmoServer.Controllers
 
             if (transfer == null)
             {
-                return NotFound("Could not find transfer with the provided id");
+                return NotFound(new { message = "Could not find transfer with the provided id" });
             }
 
             API_Transfer apiTransfer = ConvertTransferToApiTransfer(transfer);
@@ -208,18 +208,18 @@ namespace TenmoServer.Controllers
             // Check that the account IDs actually correspond to accounts.
             if (fromAccount == null)
             {
-                return NotFound("The specified UserId does not correspond to an account");
+                return NotFound(new { message = "The specified UserId does not correspond to an account" });
             }
 
             if (toAccount == null)
             {
-                return NotFound("The specified UserId does not correspond to an account");
+                return NotFound(new { message = "The specified UserId does not correspond to an account" });
             }
 
             // Ensure that the account isn't sending money to itself
             if (fromAccount.AccountId == toAccount.AccountId)
             {
-                return BadRequest("Cannot create transfer where source and destination account are the same");
+                return BadRequest(new { message = "Cannot create transfer where source and destination account are the same" });
             }
 
             return null;
