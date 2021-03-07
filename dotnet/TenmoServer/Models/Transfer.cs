@@ -1,4 +1,6 @@
-﻿namespace TenmoServer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TenmoServer.Models
 {
     public abstract class TransferBase
     {
@@ -34,7 +36,10 @@
 
         public API_Transfer(TransferBase copyFrom) : base(copyFrom) { }
 
+        [Required(ErrorMessage = "The FromUser field is required")]
         public UserInfo FromUser { get; set; }
+
+        [Required(ErrorMessage = "The ToUser field is required")]
         public UserInfo ToUser { get; set; }
     }
 }

@@ -59,8 +59,8 @@ namespace TenmoServer.Controllers
             }
 
             // Get accounts from the account IDs in the transfer
-            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId);
-            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId);
+            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
+            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
 
             // Check that the account IDs actually correspond to accounts.
             if (fromAccount == null)
@@ -136,8 +136,8 @@ namespace TenmoServer.Controllers
             }
 
             // Get accounts from the account IDs in the transfer
-            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId);
-            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId);
+            Account fromAccount = accountDAO.GetAccountByUserId(apiTransfer.FromUser.UserId.Value);
+            Account toAccount = accountDAO.GetAccountByUserId(apiTransfer.ToUser.UserId.Value);
 
             // Check that the account IDs actually correspond to accounts.
             if (fromAccount == null)

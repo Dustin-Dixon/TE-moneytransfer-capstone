@@ -1,4 +1,6 @@
-﻿namespace TenmoServer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TenmoServer.Models
 {
     public class User
     {
@@ -25,7 +27,9 @@
     /// </summary>
     public class LoginUser
     {
+        [Required(ErrorMessage = "The Username field is required")]
         public string Username { get; set; }
+        [Required(ErrorMessage = "The Password field is required")]
         public string Password { get; set; }
     }
 }

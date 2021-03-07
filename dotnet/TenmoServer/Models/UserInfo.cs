@@ -1,8 +1,10 @@
-﻿using TenmoServer.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using TenmoServer.Models;
 
 public class UserInfo
 {
-    public int UserId { get; set; }
+    [Required(ErrorMessage = "The UserId field is required")]
+    public int? UserId { get; set; }
     public string Username { get; set; }
 
     public UserInfo() { }
