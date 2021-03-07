@@ -8,9 +8,13 @@ namespace TenmoClient
     {
         private static readonly ConsoleService consoleService = new ConsoleService();
         private static readonly AuthService authService = new AuthService();
+        private static readonly UserService userService = new UserService();
+        private static readonly BankingService bankingService = new BankingService();
 
         static void Main(string[] args)
         {
+            authService.RegisterLoginHandler(userService);
+            authService.RegisterLoginHandler(bankingService);
             Run();
         }
 
@@ -30,14 +34,10 @@ namespace TenmoClient
                 }
                 else if (loginRegister == 1)
                 {
-                    while (!UserService.IsLoggedIn()) //will keep looping until user is logged in
+                    while (!userService.IsLoggedIn()) //will keep looping until user is logged in
                     {
                         LoginUser loginUser = consoleService.PromptForLogin();
-                        API_User user = authService.Login(loginUser);
-                        if (user != null)
-                        {
-                            UserService.SetLogin(user);
-                        }
+                        authService.Login(loginUser);
                     }
                 }
                 else if (loginRegister == 2)
@@ -87,7 +87,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-                    API_Account currentAccount = authService.GetCurrentAccount();
+                    API_Account currentAccount = bankingService.GetCurrentAccount();
                     if (currentAccount != null)
                     {
                         Console.WriteLine($"Your current account balance is: {currentAccount.Balance:C2}");
@@ -96,14 +96,14 @@ namespace TenmoClient
                 else if (menuSelection == 2)
                 {
                     // call ViewTransfers server side
-                    List<API_Transfer> transfers = authService.GetTransfers();
+                    List<API_Transfer> transfers = bankingService.GetTransfers();
                     if (transfers != null)
                     {
-                        consoleService.DisplayTransfers(transfers);
+                        consoleService.DisplayTransfers(transfers, userService.GetUserId());
                         int transferId = consoleService.PromptForTransferID("view details");
                         if (transferId != 0)
                         {
-                            API_Transfer transferToView = authService.GetTransferById(transferId);
+                            API_Transfer transferToView = bankingService.GetTransferById(transferId);
                             if (transferToView != null)
                             {
                                 consoleService.DisplayTransferDetails(transferToView);
@@ -117,14 +117,14 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 4)
                 {
-                    List<UserInfo> users = authService.GetAllUsers();
+                    List<UserInfo> users = bankingService.GetAllUsers();
 
                     if (users != null)
                     {
                         List<UserInfo> displayUsers = new List<UserInfo>();
                         foreach (UserInfo user in users)
                         {
-                            if (user.UserId != UserService.GetUserId())
+                            if (user.UserId != userService.GetUserId())
                             {
                                 displayUsers.Add(user);
                             }
@@ -138,7 +138,7 @@ namespace TenmoClient
 
                             UserInfo fromUser = new UserInfo()
                             {
-                                UserId = UserService.GetUserId()
+                                UserId = userService.GetUserId()
                             };
                             UserInfo toUser = new UserInfo()
                             {
@@ -151,20 +151,20 @@ namespace TenmoClient
                                 Amount = amountToSend
                             };
 
-                            authService.SendTransfer(transfer, "send");
+                            bankingService.SendTransfer(transfer, "send");
                         }
                     }
                 }
                 else if (menuSelection == 5)
                 {
-                    List<UserInfo> users = authService.GetAllUsers();
+                    List<UserInfo> users = bankingService.GetAllUsers();
 
                     if (users != null)
                     {
                         List<UserInfo> displayUsers = new List<UserInfo>();
                         foreach (UserInfo user in users)
                         {
-                            if (user.UserId != UserService.GetUserId())
+                            if (user.UserId != userService.GetUserId())
                             {
                                 displayUsers.Add(user);
                             }
@@ -182,7 +182,7 @@ namespace TenmoClient
                             };
                             UserInfo toUser = new UserInfo()
                             {
-                                UserId = UserService.GetUserId()
+                                UserId = userService.GetUserId()
                             };
                             API_Transfer transfer = new API_Transfer
                             {
@@ -191,14 +191,14 @@ namespace TenmoClient
                                 Amount = amountToSend
                             };
 
-                            authService.SendTransfer(transfer, "request");
+                            bankingService.SendTransfer(transfer, "request");
                         }
                     }
                 }
                 else if (menuSelection == 6)
                 {
                     Console.WriteLine("");
-                    UserService.SetLogin(new API_User()); //wipe out previous login info
+                    authService.Logout(); //wipe out previous login info
                     Run(); //return to entry point
                 }
                 else

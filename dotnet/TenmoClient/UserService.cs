@@ -2,26 +2,31 @@
 
 namespace TenmoClient
 {
-    public static class UserService
+    public class UserService : ILoginHandler
     {
-        private static API_User user = new API_User();
+        private API_User user = new API_User();
 
-        public static void SetLogin(API_User u)
+        public void Login(API_User u)
         {
             user = u;
         }
 
-        public static int GetUserId()
+        public void Logout()
+        {
+            user = new API_User();
+        }
+
+        public int GetUserId()
         {
             return user.UserId;
         }
 
-        public static bool IsLoggedIn()
+        public bool IsLoggedIn()
         {
             return !string.IsNullOrWhiteSpace(user.Token);
         }
 
-        public static string GetToken()
+        public string GetToken()
         {
             return user?.Token ?? string.Empty;
         }
