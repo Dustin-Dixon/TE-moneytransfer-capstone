@@ -64,10 +64,11 @@ namespace TenmoServer.Controllers
             }
 
             // Translate API transfer to dao transfer
-            Transfer transfer = new Transfer(apiTransfer)
+            Transfer transfer = new Transfer()
             {
                 FromAccountId = fromAccount.AccountId,
                 ToAccountId = toAccount.AccountId,
+                Amount = apiTransfer.Amount,
                 TransferType = "Send",
                 TransferStatus = "Approved"
             };
@@ -112,10 +113,11 @@ namespace TenmoServer.Controllers
             }
 
             // Translate API transfer to dao transfer
-            Transfer transfer = new Transfer(apiTransfer)
+            Transfer transfer = new Transfer()
             {
                 FromAccountId = fromAccount.AccountId,
                 ToAccountId = toAccount.AccountId,
+                Amount = apiTransfer.Amount,
                 TransferType = "Request",
                 TransferStatus = "Pending"
             };
@@ -230,8 +232,12 @@ namespace TenmoServer.Controllers
             User fromUser = userDAO.GetUserByAccountId(transfer.FromAccountId);
             User toUser = userDAO.GetUserByAccountId(transfer.ToAccountId);
 
-            API_Transfer apiTransfer = new API_Transfer(transfer)
+            API_Transfer apiTransfer = new API_Transfer()
             {
+                TransferId = transfer.TransferId,
+                TransferStatus = transfer.TransferStatus,
+                TransferType = transfer.TransferType,
+                Amount = transfer.Amount,
                 FromUser = new UserInfo(fromUser),
                 ToUser = new UserInfo(toUser)
             };
