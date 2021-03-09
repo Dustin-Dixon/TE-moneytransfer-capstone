@@ -59,7 +59,6 @@ namespace TenmoServer.Controllers
             // Cannot send more money than the source account has
             if (fromAccount.Balance < apiTransfer.Amount)
             {
-                // TODO: Better return message
                 return BadRequest(new { message = "You cannot send more money than you currently have" });
             }
 
